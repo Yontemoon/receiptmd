@@ -3,14 +3,30 @@ import { createFileRoute } from "@tanstack/react-router"
 export const Route = createFileRoute("/api/parse_receipt")({
   server: {
     handlers: {
-      GET: async ({ request }) => {
-        // POST image in hyperbolic API
-
+      GET: async () => {
         return Response.json({
           hello: "world",
         })
       },
       POST: async ({ request }) => {
+        const formData = await request.formData()
+
+        const file = formData.get("file") as File | null
+        console.log(file)
+
+        if (!file) {
+          return Response.json({
+            status: 400,
+            message: "Missing front or back image.",
+          })
+        }
+
+        const fileBase64 = Buffer.from(await file.arrayBuffer()).toString(
+          "base64"
+        )
+
+        const fileUrl = `data:${file.type};base64,${fileBase64}`
+
         const payload = {
           model: "Qwen/Qwen2.5-VL-72B-Instruct",
           messages: [
@@ -20,15 +36,12 @@ export const Route = createFileRoute("/api/parse_receipt")({
                 {
                   type: "text",
                   text: `
-              Extract the Driver License Number or unique ID from the card or passport.
-              If an ID is found, respond exactly: 200,<ID_NUMBER>
-              If no ID is present, respond: 400
-              If the image does not contain a card, respond: 422
-              If the two images show different cards, respond: 409
-            `,
+                  Extract the receipt. return the receipt of what the person bought, no explanation needed.
+                  Return it in JSON format that is easily parsed.
+                 Generate a list of items being bought, use the following structure "[{id: string, price: number, name: string}]".
+                  `,
                 },
-                { type: "image_url", image_url: { url: frontDataUrl } },
-                { type: "image_url", image_url: { url: backDataUrl } },
+                { type: "image_url", image_url: { url: fileUrl } },
               ],
             },
           ],
@@ -37,6 +50,8 @@ export const Route = createFileRoute("/api/parse_receipt")({
           top_p: 0.001,
           stream: false,
         }
+
+        let output: string | null = null
 
         try {
           const response = await fetch(
@@ -61,28 +76,26 @@ export const Route = createFileRoute("/api/parse_receipt")({
           console.error("Hyperbolic failed → skipping validation:", err)
 
           // Skip validation so it doesn't block the user.
-          return Response.json(
-            {
-              status: 200,
-              skipped: true,
-              message: "Validation skipped due to API failure.",
-            },
-            { status: 200 }
-          )
+          return Response.json({
+            status: 200,
+            skipped: true,
+            message: "Validation skipped due to API failure.",
+          })
         }
 
         if (!output) {
-          return NextResponse.json(
-            {
-              status: 200,
-              skipped: true,
-              message: "Validation skipped (empty response).",
-            },
-            { status: 200 }
-          )
+          return Response.json({
+            status: 200,
+            skipped: true,
+            message: "Validation skipped (empty response).",
+          })
         }
-
-        return new Response("It  worked")
+        console.log(output)
+        return Response.json({
+          status: 200,
+          skipped: false,
+          message: output,
+        })
       },
     },
   },
