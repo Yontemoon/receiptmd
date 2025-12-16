@@ -14,6 +14,7 @@ import { Route as LogoutRouteImport } from './routes/logout'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthedRouteImport } from './routes/_authed'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ApiReceiptRouteImport } from './routes/api/receipt'
 import { Route as ApiParse_receiptRouteImport } from './routes/api/parse_receipt'
 import { Route as AuthedPostsRouteImport } from './routes/_authed/posts'
 import { Route as AuthedPostsIndexRouteImport } from './routes/_authed/posts.index'
@@ -41,6 +42,11 @@ const AuthedRoute = AuthedRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiReceiptRoute = ApiReceiptRouteImport.update({
+  id: '/api/receipt',
+  path: '/api/receipt',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiParse_receiptRoute = ApiParse_receiptRouteImport.update({
@@ -71,6 +77,7 @@ export interface FileRoutesByFullPath {
   '/signup': typeof SignupRoute
   '/posts': typeof AuthedPostsRouteWithChildren
   '/api/parse_receipt': typeof ApiParse_receiptRoute
+  '/api/receipt': typeof ApiReceiptRoute
   '/posts/$postId': typeof AuthedPostsPostIdRoute
   '/posts/': typeof AuthedPostsIndexRoute
 }
@@ -80,6 +87,7 @@ export interface FileRoutesByTo {
   '/logout': typeof LogoutRoute
   '/signup': typeof SignupRoute
   '/api/parse_receipt': typeof ApiParse_receiptRoute
+  '/api/receipt': typeof ApiReceiptRoute
   '/posts/$postId': typeof AuthedPostsPostIdRoute
   '/posts': typeof AuthedPostsIndexRoute
 }
@@ -92,6 +100,7 @@ export interface FileRoutesById {
   '/signup': typeof SignupRoute
   '/_authed/posts': typeof AuthedPostsRouteWithChildren
   '/api/parse_receipt': typeof ApiParse_receiptRoute
+  '/api/receipt': typeof ApiReceiptRoute
   '/_authed/posts/$postId': typeof AuthedPostsPostIdRoute
   '/_authed/posts/': typeof AuthedPostsIndexRoute
 }
@@ -104,6 +113,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/posts'
     | '/api/parse_receipt'
+    | '/api/receipt'
     | '/posts/$postId'
     | '/posts/'
   fileRoutesByTo: FileRoutesByTo
@@ -113,6 +123,7 @@ export interface FileRouteTypes {
     | '/logout'
     | '/signup'
     | '/api/parse_receipt'
+    | '/api/receipt'
     | '/posts/$postId'
     | '/posts'
   id:
@@ -124,6 +135,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/_authed/posts'
     | '/api/parse_receipt'
+    | '/api/receipt'
     | '/_authed/posts/$postId'
     | '/_authed/posts/'
   fileRoutesById: FileRoutesById
@@ -135,6 +147,7 @@ export interface RootRouteChildren {
   LogoutRoute: typeof LogoutRoute
   SignupRoute: typeof SignupRoute
   ApiParse_receiptRoute: typeof ApiParse_receiptRoute
+  ApiReceiptRoute: typeof ApiReceiptRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -172,6 +185,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/receipt': {
+      id: '/api/receipt'
+      path: '/api/receipt'
+      fullPath: '/api/receipt'
+      preLoaderRoute: typeof ApiReceiptRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/parse_receipt': {
@@ -237,6 +257,7 @@ const rootRouteChildren: RootRouteChildren = {
   LogoutRoute: LogoutRoute,
   SignupRoute: SignupRoute,
   ApiParse_receiptRoute: ApiParse_receiptRoute,
+  ApiReceiptRoute: ApiReceiptRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

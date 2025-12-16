@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router"
 import React, { useTransition } from "react"
 import { Button } from "~/components/ui/button"
 import { Input } from "~/components/ui/input"
+import { Spinner } from "~/components/ui/spinner"
 export const Route = createFileRoute("/")({
   component: Home,
 })
@@ -13,6 +14,7 @@ function Home() {
 
   const handleClick = async () => {
     if (file) {
+      setInfo(null)
       startTransition(async () => {
         const formData = new FormData()
         formData.append("file", file)
@@ -22,11 +24,9 @@ function Home() {
           body: formData,
         })
         const data = await response.json()
-        console.log(data)
-        if (data.message) {
-          const parsed = JSON.parse(data.message)
 
-          setInfo(parsed)
+        if (data.message) {
+          setInfo(data.message)
         }
       })
     }
@@ -34,12 +34,12 @@ function Home() {
 
   return (
     <div className="flex items-center  justify-center w-full">
-      <div className="p-2 max-w-lg space-y-3">
+      <div className="p-2 max-w-lg space-y-3 w-full">
         <Input
           type="file"
+          disabled={isPending}
           onChange={(e) => {
             const files = e.target.files
-            console.log(file)
             if (files) {
               setFile(files[0])
             }
@@ -48,7 +48,8 @@ function Home() {
         <Button onClick={handleClick} disabled={isPending} className="w-full">
           {isPending ? "Adding..." : "Add"}
         </Button>
-        <div>{info && JSON.stringify(info)}</div>
+        {isPending && <Spinner />}
+        <div>{info && JSON.stringify(info, null, 2)}</div>
       </div>
     </div>
   )

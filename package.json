@@ -7,7 +7,8 @@
     "dev": "vite dev",
     "build": "vite build && tsc --noEmit",
     "preview": "vite preview",
-    "start": "pnpx srvx --prod -s ../client dist/server/server.js"
+    "start": "pnpx srvx --prod -s ../client dist/server/server.js",
+    "db-types": "npx supabase gen types typescript --project-id vllpbkedmfuiyekutxne --schema public > src/types/database.types.ts"
   },
   "keywords": [],
   "author": "",
@@ -15,8 +16,8 @@
   "dependencies": {
     "@radix-ui/react-slot": "^1.2.4",
     "@fontsource-variable/inter": "^5.2.8",
-    "@supabase/ssr": "^0.5.2",
-    "@supabase/supabase-js": "^2.48.1",
+    "@supabase/ssr": "^0.8.0",
+    "@supabase/supabase-js": "^2.88.0",
     "@tanstack/react-router": "^1.141.2",
     "@tanstack/react-router-devtools": "^1.141.2",
     "@tanstack/react-start": "^1.141.3",

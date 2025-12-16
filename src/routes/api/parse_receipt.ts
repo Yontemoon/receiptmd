@@ -1,4 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router"
+import { TReceipt } from "~/types/parsed.types"
+import { OLLAMA_MODEL, QWEN_MODEL } from "~/utils/constants"
+import { postParsedReceiptData } from "~/utils/supabase/parsed_receipt"
+
+type dataFormat = {
+  date: string
+  company: string
+  address: string
+  store_id: string | null
+  confidence_score: number
+  items: { id: string; price: number; name: string }[]
+}
 
 export const Route = createFileRoute("/api/parse_receipt")({
   server: {
@@ -28,7 +40,7 @@ export const Route = createFileRoute("/api/parse_receipt")({
         const fileUrl = `data:${file.type};base64,${fileBase64}`
 
         const payload = {
-          model: "Qwen/Qwen2.5-VL-72B-Instruct",
+          model: QWEN_MODEL,
           messages: [
             {
               role: "user",
@@ -36,16 +48,42 @@ export const Route = createFileRoute("/api/parse_receipt")({
                 {
                   type: "text",
                   text: `
-                  Extract the receipt. return the receipt of what the person bought, no explanation needed.
+                  Extract the receipt. Return the receipt information of what the person bought, no explanation needed.
                   Return it in JSON format that is easily parsed.
-                  Generate a list of items being bought, use the following structure "[{id: string, price: number, name: string}]".
+                  Add a confidence score that return a 0.0-1.0 score for how sure you ar about the data. If you believe the image is not
+                  a receipt, return a JSON response with status code 400 with message explaining why.
+                  If the item has an SKU (Stock Keeping Unit), add it. If it doesn't, set it to null.
+                  Generate a list of items being bought, using the following structure:
+                  '{
+                      date: string,
+                      company: string,
+                      address: string,
+                      city: string,
+                      state: string,
+                      zipcode: string
+                      store_id: string | null,
+                      confidence_score: number,
+                      items: {
+                        receipt_label: string,
+                        normalize_name: string
+                        price: number,
+                        sku: number | string | null
+                        quantity: number
+                        tax_code: string
+                      }[],
+                      totals: {
+                        subtotal: number,
+                        tax: number,
+                        tip: number,
+                        grand_total: number
+                      }
+                    }'.
                   `,
                 },
                 { type: "image_url", image_url: { url: fileUrl } },
               ],
             },
           ],
-          max_tokens: 512,
           temperature: 0.1,
           top_p: 0.001,
           stream: false,
@@ -90,15 +128,21 @@ export const Route = createFileRoute("/api/parse_receipt")({
             message: "Validation skipped (empty response).",
           })
         }
-        console.log(output)
-        return Response.json({
-          status: 200,
-          skipped: false,
-          message: output
+
+        const jsonOutput = JSON.parse(
+          output
             .replace("json", "")
             .replace(/^```(?:json)?\s*/i, "") // opening fence
             .replace(/\s*```$/, "") // closing fence
-            .trim(),
+            .trim()
+        ) as TReceipt
+
+        await postParsedReceiptData(jsonOutput)
+
+        return Response.json({
+          status: 200,
+          skipped: false,
+          message: jsonOutput,
         })
       },
     },
