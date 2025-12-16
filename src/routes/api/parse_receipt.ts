@@ -38,7 +38,7 @@ export const Route = createFileRoute("/api/parse_receipt")({
                   text: `
                   Extract the receipt. return the receipt of what the person bought, no explanation needed.
                   Return it in JSON format that is easily parsed.
-                 Generate a list of items being bought, use the following structure "[{id: string, price: number, name: string}]".
+                  Generate a list of items being bought, use the following structure "[{id: string, price: number, name: string}]".
                   `,
                 },
                 { type: "image_url", image_url: { url: fileUrl } },
@@ -94,7 +94,11 @@ export const Route = createFileRoute("/api/parse_receipt")({
         return Response.json({
           status: 200,
           skipped: false,
-          message: output,
+          message: output
+            .replace("json", "")
+            .replace(/^```(?:json)?\s*/i, "") // opening fence
+            .replace(/\s*```$/, "") // closing fence
+            .trim(),
         })
       },
     },
