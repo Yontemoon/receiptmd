@@ -132,8 +132,8 @@ export const Route = createFileRoute("/api/parse_receipt")({
         const jsonOutput = JSON.parse(
           output
             .replace("json", "")
-            .replace(/^```(?:json)?\s*/i, "") // opening fence
-            .replace(/\s*```$/, "") // closing fence
+            .replace(/^```(?:json)?\s*/i, "")
+            .replace(/\s*```$/, "")
             .trim()
         ) as TReceipt
 

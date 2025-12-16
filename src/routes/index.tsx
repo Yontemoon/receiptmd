@@ -1,16 +1,20 @@
 import { createFileRoute } from "@tanstack/react-router"
 import React, { useTransition } from "react"
 import { Button } from "~/components/ui/button"
-import { Input } from "~/components/ui/input"
+import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card"
 import { Spinner } from "~/components/ui/spinner"
+import FileInput from "~/components/file-input"
+import { TReceipt } from "~/types/parsed.types"
+import { DataTable } from "~/components/table/table"
+import { ParsedItemColumn } from "~/components/columns/parsed-receipt"
 export const Route = createFileRoute("/")({
   component: Home,
 })
 
 function Home() {
-  const [file, setFile] = React.useState<File | null>(null)
-  const [info, setInfo] = React.useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
+  const [info, setInfo] = React.useState<TReceipt | null>(null)
+  const [file, setFile] = React.useState<File | null>(null)
 
   const handleClick = async () => {
     if (file) {
@@ -33,24 +37,49 @@ function Home() {
   }
 
   return (
-    <div className="flex items-center  justify-center w-full">
-      <div className="p-2 max-w-lg space-y-3 w-full">
-        <Input
-          type="file"
-          disabled={isPending}
-          onChange={(e) => {
-            const files = e.target.files
-            if (files) {
-              setFile(files[0])
-            }
-          }}
-        />
-        <Button onClick={handleClick} disabled={isPending} className="w-full">
-          {isPending ? "Adding..." : "Add"}
-        </Button>
-        {isPending && <Spinner />}
-        <div>{info && JSON.stringify(info, null, 2)}</div>
-      </div>
+    <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_420px] m-4">
+      <Card>
+        <CardHeader>
+          <CardTitle>Data</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div>
+            {info ? (
+              <div>
+                <h2>Date: {info.date}</h2>
+                <h2>Company Store: {info.company}</h2>
+                <h2>City: {info.address}</h2>
+                <h2>State: {info.state}</h2>
+                <h2>Zip Code: {info.zipcode}</h2>
+                <div>
+                  <DataTable columns={ParsedItemColumn} data={info.items} />
+                </div>
+              </div>
+            ) : (
+              "No data yet..."
+            )}
+          </div>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardContent>
+          <FileInput
+            file={file}
+            onChange={(file) => {
+              setFile(file)
+            }}
+          />
+          <Button onClick={handleClick} disabled={isPending} className="w-full">
+            {isPending ? (
+              <span className=" flex items-center gap-2">
+                <Spinner /> Adding
+              </span>
+            ) : (
+              "Add"
+            )}
+          </Button>
+        </CardContent>
+      </Card>
     </div>
   )
 }
