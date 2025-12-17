@@ -4,7 +4,7 @@ import { Button } from "~/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card"
 import { Spinner } from "~/components/ui/spinner"
 import FileInput from "~/components/file-input"
-import { TReceipt } from "~/types/parsed.types"
+import { TItem, TReceipt } from "~/types/parsed.types"
 import { DataTable } from "~/components/table/table"
 import { ParsedItemColumn } from "~/components/columns/parsed-receipt"
 export const Route = createFileRoute("/")({
@@ -14,6 +14,7 @@ export const Route = createFileRoute("/")({
 function Home() {
   const [isPending, startTransition] = useTransition()
   const [info, setInfo] = React.useState<TReceipt | null>(null)
+  const [items, setItems] = React.useState<TItem[]>([])
   const [file, setFile] = React.useState<File | null>(null)
 
   const handleClick = async () => {
@@ -31,9 +32,14 @@ function Home() {
 
         if (data.message) {
           setInfo(data.message)
+          setItems(data.message.items)
         }
       })
     }
+  }
+
+  const handleConfirmingParsedData = async () => {
+    console.log(items)
   }
 
   return (
@@ -43,18 +49,37 @@ function Home() {
           <CardTitle>Data</CardTitle>
         </CardHeader>
         <CardContent>
-          <div>
+          <div className="space-y-2">
             {info ? (
-              <div>
-                <h2>Date: {info.date}</h2>
+              <>
+                <h2>Date Purchased: {info.date}</h2>
                 <h2>Company Store: {info.company}</h2>
-                <h2>City: {info.address}</h2>
+
+                <h2>Address: {info.address}</h2>
+                <h2>City: {info.city}</h2>
                 <h2>State: {info.state}</h2>
                 <h2>Zip Code: {info.zipcode}</h2>
                 <div>
-                  <DataTable columns={ParsedItemColumn} data={info.items} />
+                  {items && (
+                    <DataTable
+                      columns={ParsedItemColumn}
+                      data={items}
+                      setData={setItems}
+                      defaultNewRow={{
+                        normalize_name: "",
+                        price: 0,
+                        quantity: 1,
+                        receipt_label: "",
+                        sku: "",
+                        tax_code: "",
+                      }}
+                    />
+                  )}
                 </div>
-              </div>
+                <Button onClick={handleConfirmingParsedData}>
+                  Confirm Edits
+                </Button>
+              </>
             ) : (
               "No data yet..."
             )}
