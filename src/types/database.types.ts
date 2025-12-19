@@ -14,6 +14,24 @@ export type Database = {
   }
   public: {
     Tables: {
+      company: {
+        Row: {
+          company_id: number
+          created_at: string
+          name: string | null
+        }
+        Insert: {
+          company_id?: number
+          created_at?: string
+          name?: string | null
+        }
+        Update: {
+          company_id?: number
+          created_at?: string
+          name?: string | null
+        }
+        Relationships: []
+      }
       products: {
         Row: {
           category: string | null
@@ -42,28 +60,37 @@ export type Database = {
         Row: {
           created_at: string
           curreny: string | null
+          grand_total: number | null
           purchased_at: string | null
           receipt_id: number
           store_id: number | null
-          total: number | null
+          subtotal: number | null
+          tax: number | null
+          tip: number | null
           user_id: string | null
         }
         Insert: {
           created_at?: string
           curreny?: string | null
+          grand_total?: number | null
           purchased_at?: string | null
           receipt_id?: number
           store_id?: number | null
-          total?: number | null
+          subtotal?: number | null
+          tax?: number | null
+          tip?: number | null
           user_id?: string | null
         }
         Update: {
           created_at?: string
           curreny?: string | null
+          grand_total?: number | null
           purchased_at?: string | null
           receipt_id?: number
           store_id?: number | null
-          total?: number | null
+          subtotal?: number | null
+          tax?: number | null
+          tip?: number | null
           user_id?: string | null
         }
         Relationships: [
@@ -80,29 +107,35 @@ export type Database = {
         Row: {
           created_at: string
           entry_id: number
-          price_paid: number | null
           product_id: number | null
           quantity: number | null
           raw_receipt_label: string | null
           receipt_id: number | null
+          total_line_price: number | null
+          unit_price: number | null
+          user_id: string | null
         }
         Insert: {
           created_at?: string
           entry_id?: number
-          price_paid?: number | null
           product_id?: number | null
           quantity?: number | null
           raw_receipt_label?: string | null
           receipt_id?: number | null
+          total_line_price?: number | null
+          unit_price?: number | null
+          user_id?: string | null
         }
         Update: {
           created_at?: string
           entry_id?: number
-          price_paid?: number | null
           product_id?: number | null
           quantity?: number | null
           raw_receipt_label?: string | null
           receipt_id?: number | null
+          total_line_price?: number | null
+          unit_price?: number | null
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -123,33 +156,44 @@ export type Database = {
       }
       store: {
         Row: {
-          address: string | null
           city: string | null
-          company: string | null
+          company_id: number | null
           created_at: string
           state: string | null
           store_id: number
+          street_line: string | null
+          unique_name: string | null
           zip_code: number | null
         }
         Insert: {
-          address?: string | null
           city?: string | null
-          company?: string | null
+          company_id?: number | null
           created_at?: string
           state?: string | null
           store_id?: number
+          street_line?: string | null
+          unique_name?: string | null
           zip_code?: number | null
         }
         Update: {
-          address?: string | null
           city?: string | null
-          company?: string | null
+          company_id?: number | null
           created_at?: string
           state?: string | null
           store_id?: number
+          street_line?: string | null
+          unique_name?: string | null
           zip_code?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "store_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "company"
+            referencedColumns: ["company_id"]
+          },
+        ]
       }
       uploaded_parsed_data: {
         Row: {

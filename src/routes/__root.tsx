@@ -17,21 +17,19 @@ import { getSupabaseServerClient } from "../utils/supabase"
 
 const fetchUser = createServerFn({ method: "GET" }).handler(async () => {
   const supabase = getSupabaseServerClient()
-  const { data, error: _error } = await supabase.auth.getUser()
-
-  if (!data.user?.email) {
+  const { data, error: _error } = await supabase.auth.getClaims()
+  if (!data?.claims?.email) {
     return null
   }
 
   return {
-    email: data.user.email,
+    email: data.claims.email,
   }
 })
 
 export const Route = createRootRoute({
   beforeLoad: async () => {
     const user = await fetchUser()
-
     return {
       user,
     }
@@ -47,7 +45,7 @@ export const Route = createRootRoute({
       },
       ...seo({
         title: "Receipt MD",
-        description: `TanStack Start is a type-safe, client-first, full-stack React framework. `,
+        description: `The best way to track your spending.`,
       }),
     ],
     links: [

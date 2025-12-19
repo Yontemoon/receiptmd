@@ -1,13 +1,10 @@
 type TReceipt = {
-  date: string
-  company: string
-  address: string
-  city: string
-  state: string
-  zipcode: string
-  store_id: string | null
+  status: "success"
   confidence_score: number
+  merchant: TMerchant
+  transaction: TTime
   items: TItem[]
+  currency: string
   totals: {
     subtotal: number
     tax: number
@@ -17,12 +14,30 @@ type TReceipt = {
 }
 
 type TItem = {
-  receipt_label: string
-  normalize_name: string
-  price: number
+  raw_text: string
+  normalized_name: string
+  unit_price: number
+  total_line_price: number
   sku: null | string
+  standard_unit: string
   quantity: number
   tax_code: string
+  category: string
+  sku_or_upc: string
 }
 
-export type { TReceipt, TItem }
+type TTime = {
+  date: string // YYYY-MM-DD
+  time: string // HH:MM
+}
+
+type TMerchant = {
+  name: string
+  store_number: string | null
+  street_line: string
+  city: string
+  state: string
+  zipcode: number
+}
+
+export type { TReceipt, TItem, TMerchant, TTime }

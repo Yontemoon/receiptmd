@@ -14,9 +14,11 @@ import { Route as LogoutRouteImport } from './routes/logout'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthedRouteImport } from './routes/_authed'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthCallbackRouteImport } from './routes/auth/callback'
 import { Route as ApiReceiptRouteImport } from './routes/api/receipt'
 import { Route as ApiParse_receiptRouteImport } from './routes/api/parse_receipt'
 import { Route as AuthedPostsRouteImport } from './routes/_authed/posts'
+import { Route as AuthedAppRouteImport } from './routes/_authed/app'
 import { Route as AuthedPostsIndexRouteImport } from './routes/_authed/posts.index'
 import { Route as AuthedPostsPostIdRouteImport } from './routes/_authed/posts.$postId'
 
@@ -44,6 +46,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthCallbackRoute = AuthCallbackRouteImport.update({
+  id: '/auth/callback',
+  path: '/auth/callback',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiReceiptRoute = ApiReceiptRouteImport.update({
   id: '/api/receipt',
   path: '/api/receipt',
@@ -57,6 +64,11 @@ const ApiParse_receiptRoute = ApiParse_receiptRouteImport.update({
 const AuthedPostsRoute = AuthedPostsRouteImport.update({
   id: '/posts',
   path: '/posts',
+  getParentRoute: () => AuthedRoute,
+} as any)
+const AuthedAppRoute = AuthedAppRouteImport.update({
+  id: '/app',
+  path: '/app',
   getParentRoute: () => AuthedRoute,
 } as any)
 const AuthedPostsIndexRoute = AuthedPostsIndexRouteImport.update({
@@ -75,9 +87,11 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/logout': typeof LogoutRoute
   '/signup': typeof SignupRoute
+  '/app': typeof AuthedAppRoute
   '/posts': typeof AuthedPostsRouteWithChildren
   '/api/parse_receipt': typeof ApiParse_receiptRoute
   '/api/receipt': typeof ApiReceiptRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/posts/$postId': typeof AuthedPostsPostIdRoute
   '/posts/': typeof AuthedPostsIndexRoute
 }
@@ -86,8 +100,10 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/logout': typeof LogoutRoute
   '/signup': typeof SignupRoute
+  '/app': typeof AuthedAppRoute
   '/api/parse_receipt': typeof ApiParse_receiptRoute
   '/api/receipt': typeof ApiReceiptRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/posts/$postId': typeof AuthedPostsPostIdRoute
   '/posts': typeof AuthedPostsIndexRoute
 }
@@ -98,9 +114,11 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/logout': typeof LogoutRoute
   '/signup': typeof SignupRoute
+  '/_authed/app': typeof AuthedAppRoute
   '/_authed/posts': typeof AuthedPostsRouteWithChildren
   '/api/parse_receipt': typeof ApiParse_receiptRoute
   '/api/receipt': typeof ApiReceiptRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/_authed/posts/$postId': typeof AuthedPostsPostIdRoute
   '/_authed/posts/': typeof AuthedPostsIndexRoute
 }
@@ -111,9 +129,11 @@ export interface FileRouteTypes {
     | '/login'
     | '/logout'
     | '/signup'
+    | '/app'
     | '/posts'
     | '/api/parse_receipt'
     | '/api/receipt'
+    | '/auth/callback'
     | '/posts/$postId'
     | '/posts/'
   fileRoutesByTo: FileRoutesByTo
@@ -122,8 +142,10 @@ export interface FileRouteTypes {
     | '/login'
     | '/logout'
     | '/signup'
+    | '/app'
     | '/api/parse_receipt'
     | '/api/receipt'
+    | '/auth/callback'
     | '/posts/$postId'
     | '/posts'
   id:
@@ -133,9 +155,11 @@ export interface FileRouteTypes {
     | '/login'
     | '/logout'
     | '/signup'
+    | '/_authed/app'
     | '/_authed/posts'
     | '/api/parse_receipt'
     | '/api/receipt'
+    | '/auth/callback'
     | '/_authed/posts/$postId'
     | '/_authed/posts/'
   fileRoutesById: FileRoutesById
@@ -148,6 +172,7 @@ export interface RootRouteChildren {
   SignupRoute: typeof SignupRoute
   ApiParse_receiptRoute: typeof ApiParse_receiptRoute
   ApiReceiptRoute: typeof ApiReceiptRoute
+  AuthCallbackRoute: typeof AuthCallbackRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -187,6 +212,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/auth/callback': {
+      id: '/auth/callback'
+      path: '/auth/callback'
+      fullPath: '/auth/callback'
+      preLoaderRoute: typeof AuthCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/receipt': {
       id: '/api/receipt'
       path: '/api/receipt'
@@ -206,6 +238,13 @@ declare module '@tanstack/react-router' {
       path: '/posts'
       fullPath: '/posts'
       preLoaderRoute: typeof AuthedPostsRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/app': {
+      id: '/_authed/app'
+      path: '/app'
+      fullPath: '/app'
+      preLoaderRoute: typeof AuthedAppRouteImport
       parentRoute: typeof AuthedRoute
     }
     '/_authed/posts/': {
@@ -240,10 +279,12 @@ const AuthedPostsRouteWithChildren = AuthedPostsRoute._addFileChildren(
 )
 
 interface AuthedRouteChildren {
+  AuthedAppRoute: typeof AuthedAppRoute
   AuthedPostsRoute: typeof AuthedPostsRouteWithChildren
 }
 
 const AuthedRouteChildren: AuthedRouteChildren = {
+  AuthedAppRoute: AuthedAppRoute,
   AuthedPostsRoute: AuthedPostsRouteWithChildren,
 }
 
@@ -258,6 +299,7 @@ const rootRouteChildren: RootRouteChildren = {
   SignupRoute: SignupRoute,
   ApiParse_receiptRoute: ApiParse_receiptRoute,
   ApiReceiptRoute: ApiReceiptRoute,
+  AuthCallbackRoute: AuthCallbackRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

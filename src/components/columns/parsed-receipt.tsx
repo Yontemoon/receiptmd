@@ -31,18 +31,7 @@ const ParsedItemColumn: ColumnDef<TItem>[] = [
   },
 
   {
-    accessorKey: "normalize_name",
-    header: ({ column }) => {
-      return <ColumnHeader title="Name" column={column} />
-    },
-    cell: ({ getValue, row, column, table }) => {
-      return (
-        <EditCell getValue={getValue} row={row} column={column} table={table} />
-      )
-    },
-  },
-  {
-    accessorKey: "receipt_label",
+    accessorKey: "raw_text",
     header: ({ column }) => {
       return <ColumnHeader title="Receipt Label" column={column} />
     },
@@ -53,9 +42,34 @@ const ParsedItemColumn: ColumnDef<TItem>[] = [
     },
   },
   {
-    accessorKey: "price",
+    accessorKey: "normalized_name",
     header: ({ column }) => {
-      return <ColumnHeader title="Price" column={column} />
+      return <ColumnHeader title="Readable Name" column={column} />
+    },
+    cell: ({ getValue, row, column, table }) => {
+      return (
+        <EditCell getValue={getValue} row={row} column={column} table={table} />
+      )
+    },
+  },
+  {
+    accessorKey: "total_line_price",
+    header: ({ column }) => {
+      return <ColumnHeader title="Total Price" column={column} />
+    },
+    cell: ({ getValue, row, column, table }) => {
+      return (
+        <EditCell getValue={getValue} row={row} column={column} table={table} />
+      )
+    },
+    meta: {
+      type: "number",
+    },
+  },
+  {
+    accessorKey: "unit_price",
+    header: ({ column }) => {
+      return <ColumnHeader title="Unit Price" column={column} />
     },
     cell: ({ getValue, row, column, table }) => {
       return (

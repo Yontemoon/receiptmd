@@ -1,26 +1,26 @@
 import { createFileRoute } from "@tanstack/react-router"
+import { authMiddleware } from "~/lib/middleware/auth"
 import { TReceipt } from "~/types/parsed.types"
-import { OLLAMA_MODEL, QWEN_MODEL } from "~/utils/constants"
+import { QWEN_MODEL } from "~/utils/constants"
 import { postParsedReceiptData } from "~/utils/supabase/parsed_receipt"
-
-type dataFormat = {
-  date: string
-  company: string
-  address: string
-  store_id: string | null
-  confidence_score: number
-  items: { id: string; price: number; name: string }[]
-}
 
 export const Route = createFileRoute("/api/parse_receipt")({
   server: {
+    middleware: [authMiddleware],
     handlers: {
-      GET: async () => {
+      GET: async ({ context }) => {
+        if (!context.user) {
+          throw new Error("Unauthorized")
+        }
+
         return Response.json({
           hello: "world",
         })
       },
-      POST: async ({ request }) => {
+      POST: async ({ request, context }) => {
+        if (!context.user) {
+          throw new Error("Unauthorized")
+        }
         const formData = await request.formData()
 
         const file = formData.get("file") as File | null
@@ -48,36 +48,55 @@ export const Route = createFileRoute("/api/parse_receipt")({
                 {
                   type: "text",
                   text: `
-                  Extract the receipt. Return the receipt information of what the person bought, no explanation needed.
-                  Return it in JSON format that is easily parsed.
-                  Add a confidence score that return a 0.0-1.0 score for how sure you ar about the data. If you believe the image is not
-                  a receipt, return a JSON response with status code 400 with message explaining why.
-                  If the item has an SKU (Stock Keeping Unit), add it. If it doesn't, set it to null.
-                  Generate a list of items being bought, using the following structure:
-                  '{
-                      date: string,
-                      company: string,
-                      address: string,
-                      city: string,
-                      state: string,
-                      zipcode: string
-                      store_id: string | null,
-                      confidence_score: number,
-                      items: {
-                        receipt_label: string,
-                        normalize_name: string
-                        price: number,
-                        sku: number | string | null
-                        quantity: number
-                        tax_code: string
-                      }[],
-                      totals: {
-                        subtotal: number,
-                        tax: number,
-                        tip: number,
-                        grand_total: number
+                      Extract the receipt information. Return the data in a JSON format that is strictly parsable.
+
+                      RULES:
+                      1. CONFIDENCE: Return a 0.0-1.0 score for 'confidence_score'. If the image is not a receipt, return a JSON with status "error" and code 400.
+                      2. DATES: Format all dates as ISO 8601 (YYYY-MM-DD).
+                      3. MONEY: Convert all money to integers (cents). Example: $12.50 -> 1250.
+                      4. NULLS: If a field (like SKU) is not visible, return null. Do not hallucinate data.
+
+                      DATA NORMALIZATION:
+                      - standard_unit: Must be one of ['ea', 'lb', 'oz', 'kg', 'g', 'l', 'ml']. Use 'ea' for counts (boxes, bottles).
+                      - category: Must be one of ['Groceries', 'Household', 'Personal Care', 'Alcohol', 'Pet', 'Dining Out', 'Tax', 'Fee', 'Other'].
+
+                      OUTPUT STRUCTURE:
+                      {
+                        "status": "success",
+                        "confidence_score": 0.95,
+                        "merchant": {
+                          "name": string,
+                          "store_number": string | null, // The specific branch number printed on receipt (e.g. #106 or a unique phone-number)
+                          "street_line": string,
+                          "city": string,
+                          "state": string,
+                          "zipcode": number
+                        },
+                        "transaction": {
+                          "date": string, // YYYY-MM-DD
+                          "time": string // 24hr format HH:MM
+                        },
+                        "currency": string, // use ISO codes like "usd" or "eur" for example,
+                        "items": [
+                          {
+                            "raw_text": string, // The exact text as it appears on the line
+                            "normalized_name": string, // Cleaned up name (e.g. "Oatly Oat Milk")
+                            "category": string, // From the allowed list above
+                            "quantity": number, // Default to 1 if not specified
+                            "standard_unit": string, // From the allowed list above
+                            "unit_price": number, // Price per 1 unit in cents
+                            "total_line_price": number, // Quantity * Unit Price in cents
+                            "sku_or_upc": string | null, // The product code if visible
+                            "tax_code": string | null // e.g., "A", "E", "T", "F"
+                          }
+                        ],
+                        "totals": {
+                          "subtotal": number,
+                          "tax": number,
+                          "tip": number,
+                          "grand_total": number
+                        }
                       }
-                    }'.
                   `,
                 },
                 { type: "image_url", image_url: { url: fileUrl } },
@@ -120,6 +139,7 @@ export const Route = createFileRoute("/api/parse_receipt")({
             message: "Validation skipped due to API failure.",
           })
         }
+        console.log(output)
 
         if (!output) {
           return Response.json({

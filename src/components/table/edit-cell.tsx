@@ -2,7 +2,7 @@ import React from "react"
 import { Input } from "../ui/input"
 import { Row, Column, Table } from "@tanstack/react-table"
 
-// !Modify this
+// ! Modify this
 type PropTypes = {
   getValue: () => unknown
   row: Row<any>

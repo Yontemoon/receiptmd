@@ -22,6 +22,8 @@ import {
 } from "~/components/ui/table"
 import { ViewOption } from "./column-toggle"
 import { Button } from "../ui/button"
+import { useForm } from "@tanstack/react-form"
+import { ZParsedData } from "~/lib/zod"
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
@@ -79,7 +81,6 @@ export function DataTable<TData, TValue>({
           )
         }
       },
-
       addRow: (newRow) => {
         const setFunc = (old: TData[]) => [...old, newRow]
 
@@ -109,8 +110,6 @@ export function DataTable<TData, TValue>({
   })
 
   const removeRows = () => {
-    console.log(table.getSelectedRowModel().rows)
-
     const meta = table.options.meta
 
     if (meta) {
