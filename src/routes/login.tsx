@@ -3,6 +3,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router"
 import { createServerFn } from "@tanstack/react-start"
 import { Button } from "~/components/ui/button"
 import { auth } from "~/utils/supabase"
+import { Card, CardContent } from "~/components/ui/card"
 import { z } from "zod"
 
 export const Route = createFileRoute("/login")({
@@ -42,10 +43,24 @@ function LoginComp() {
   }
 
   return (
-    <div className="mx-auto flex w-full justify-center mt-10">
-      <Button onClick={handleLogin} disabled={isPending}>
-        {isPending ? "Loggin in..." : "Login with Google"}
-      </Button>
+    <div className="mx-auto flex max-w-sm justify-center mt-10 flex-col items-center gap-5">
+      <h1 className="text-5xl mt-10">Receipt MD</h1>
+      <div className="text-4xl text-center">
+        Where you track
+        <span className="font-bold"> your </span>
+        spending
+      </div>
+      <Card>
+        <CardContent className="w-full">
+          <Button
+            onClick={handleLogin}
+            disabled={isPending}
+            className="hover:cursor-pointer w-50"
+          >
+            {isPending ? "Loggin in..." : "Login with Google"}
+          </Button>
+        </CardContent>
+      </Card>
     </div>
   )
 }

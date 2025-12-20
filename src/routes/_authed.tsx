@@ -1,4 +1,4 @@
-import { createFileRoute, redirect } from "@tanstack/react-router"
+import { createFileRoute, Link, Outlet, redirect } from "@tanstack/react-router"
 import { createServerFn } from "@tanstack/react-start"
 import { Login } from "../components/Login"
 import { getSupabaseServerClient } from "../utils/supabase"
@@ -28,13 +28,43 @@ export const Route = createFileRoute("/_authed")({
       })
     }
   },
-  // errorComponent: ({ error }) => {
-  //   if (error.message === "Not authenticated") {
-  //     throw redirect({
-  //       to: "/login",
-  //     })
-  //   }
-
-  //   throw error
-  // },
+  component: AuthLayout,
 })
+
+function AuthLayout() {
+  const { user } = Route.useRouteContext()
+  return (
+    <>
+      <div className="p-2 flex gap-2 text-lg">
+        <Link
+          to="/"
+          activeProps={{
+            className: "font-bold",
+          }}
+          activeOptions={{ exact: true }}
+        >
+          Home
+        </Link>{" "}
+        <Link
+          to="/posts"
+          activeProps={{
+            className: "font-bold",
+          }}
+        >
+          Posts
+        </Link>
+        <div className="ml-auto">
+          {user ? (
+            <>
+              <span className="mr-2">{user.email}</span>
+              <Link to="/logout">Logout</Link>
+            </>
+          ) : (
+            <Link to="/login">Login</Link>
+          )}
+        </div>
+      </div>
+      <Outlet />
+    </>
+  )
+}

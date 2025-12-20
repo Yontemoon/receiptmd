@@ -64,7 +64,7 @@ const auth = {
   signOut: async () => {
     const supabase = getSupabaseServerClient()
     const { error } = await supabase.auth.signOut()
-    if (error) throw error
+    return { error }
   },
 
   getSession: async () => {

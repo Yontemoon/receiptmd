@@ -91,43 +91,12 @@ function RootComponent() {
 }
 
 function RootDocument({ children }: { children: React.ReactNode }) {
-  const { user } = Route.useRouteContext()
-
   return (
     <html>
       <head>
         <HeadContent />
       </head>
       <body>
-        <div className="p-2 flex gap-2 text-lg">
-          <Link
-            to="/"
-            activeProps={{
-              className: "font-bold",
-            }}
-            activeOptions={{ exact: true }}
-          >
-            Home
-          </Link>{" "}
-          <Link
-            to="/posts"
-            activeProps={{
-              className: "font-bold",
-            }}
-          >
-            Posts
-          </Link>
-          <div className="ml-auto">
-            {user ? (
-              <>
-                <span className="mr-2">{user.email}</span>
-                <Link to="/logout">Logout</Link>
-              </>
-            ) : (
-              <Link to="/login">Login</Link>
-            )}
-          </div>
-        </div>
         <hr />
         {children}
         <TanStackRouterDevtools position="bottom-right" />

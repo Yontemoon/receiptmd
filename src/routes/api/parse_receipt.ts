@@ -54,7 +54,7 @@ export const Route = createFileRoute("/api/parse_receipt")({
                       1. CONFIDENCE: Return a 0.0-1.0 score for 'confidence_score'. If the image is not a receipt, return a JSON with status "error" and code 400.
                       2. DATES: Format all dates as ISO 8601 (YYYY-MM-DD).
                       3. MONEY: Convert all money to integers (cents). Example: $12.50 -> 1250.
-                      4. NULLS: If a field (like SKU) is not visible, return null. Do not hallucinate data.
+                      4. NULLS: If a field (like SKU or transaction_id) is not visible, return null. Do not hallucinate data.
 
                       DATA NORMALIZATION:
                       - standard_unit: Must be one of ['ea', 'lb', 'oz', 'kg', 'g', 'l', 'ml']. Use 'ea' for counts (boxes, bottles).
@@ -64,9 +64,11 @@ export const Route = createFileRoute("/api/parse_receipt")({
                       {
                         "status": "success",
                         "confidence_score": 0.95,
+                        "currency": string, // use ISO codes like "usd" or "eur" for example,
+                        "transaction_id": string, // This can also be a receipt number or ID. Remove special characters if it has "#" or "-".
                         "merchant": {
                           "name": string,
-                          "store_number": string | null, // The specific branch number printed on receipt (e.g. #106 or a unique phone-number)
+                          "store_number": string | null, // The specific branch number printed on receipt (e.g. 106 or a unique phone-number). Remove any special characters.
                           "street_line": string,
                           "city": string,
                           "state": string,
@@ -76,7 +78,6 @@ export const Route = createFileRoute("/api/parse_receipt")({
                           "date": string, // YYYY-MM-DD
                           "time": string // 24hr format HH:MM
                         },
-                        "currency": string, // use ISO codes like "usd" or "eur" for example,
                         "items": [
                           {
                             "raw_text": string, // The exact text as it appears on the line
