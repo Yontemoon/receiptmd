@@ -115,10 +115,10 @@ function RouteComponent() {
           <Button onClick={handleClick} disabled={isPending} className="w-full">
             {isPending ? (
               <span className=" flex items-center gap-2">
-                <Spinner /> Adding
+                <Spinner /> Parsing
               </span>
             ) : (
-              "Add"
+              "Parse"
             )}
           </Button>
         </CardContent>

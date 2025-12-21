@@ -4,6 +4,28 @@ import { getSupabaseServerClient } from "~/utils/supabase"
 import { authMiddleware } from "~/lib/middleware/auth"
 import { json } from "@tanstack/react-start"
 
+async function getCoordsWithIPGeo(address: string) {
+  const apiKey = process.env.IP_GEO_API_KEY!
+  const query = encodeURIComponent(address)
+  // Note: They have a specific 'timezone' endpoint that handles address lookups well
+  const url = `https://api.ipgeolocation.io/timezone?apiKey=${apiKey}&location=${query}`
+
+  const response = await fetch(url)
+  const data = (await response.json()) as {
+    geo: {
+      latitude: string
+      longitude: string
+    }
+    timezone: string
+  }
+
+  return {
+    lat: data.geo.latitude,
+    lon: data.geo.longitude,
+    timezone: data.timezone,
+  }
+}
+
 export const Route = createFileRoute("/api/receipt")({
   server: {
     middleware: [authMiddleware],
@@ -28,6 +50,9 @@ export const Route = createFileRoute("/api/receipt")({
           const { items, merchant, totals, transaction, currency } = receiptData
           const { city, name, state, store_number, street_line, zipcode } =
             merchant
+
+          const fullAddress = `${merchant.street_line} ${merchant.city}, ${merchant.state}`
+          const geoLocation = await getCoordsWithIPGeo(fullAddress)
 
           const supabase = getSupabaseServerClient()
 
@@ -98,6 +123,8 @@ export const Route = createFileRoute("/api/receipt")({
                 city,
                 state,
                 zip_code: zipcode,
+                latitude: geoLocation.lat,
+                longitude: geoLocation.lon,
               })
               .select("store_id")
               .single()

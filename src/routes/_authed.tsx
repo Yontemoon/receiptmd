@@ -37,7 +37,7 @@ function AuthLayout() {
     <>
       <div className="p-2 flex gap-2 text-lg">
         <Link
-          to="/"
+          to="/app"
           activeProps={{
             className: "font-bold",
           }}
@@ -46,12 +46,12 @@ function AuthLayout() {
           Home
         </Link>{" "}
         <Link
-          to="/posts"
+          to="/receipt"
           activeProps={{
             className: "font-bold",
           }}
         >
-          Posts
+          Receipts
         </Link>
         <div className="ml-auto">
           {user ? (

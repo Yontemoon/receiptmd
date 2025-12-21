@@ -4,6 +4,28 @@ import { TReceipt } from "~/types/parsed.types"
 import { QWEN_MODEL } from "~/utils/constants"
 import { postParsedReceiptData } from "~/utils/supabase/parsed_receipt"
 
+async function getCoordsWithIPGeo(address: string) {
+  const apiKey = process.env.IP_GEO_API_KEY!
+  const query = encodeURIComponent(address)
+  // Note: They have a specific 'timezone' endpoint that handles address lookups well
+  const url = `https://api.ipgeolocation.io/timezone?apiKey=${apiKey}&location=${query}`
+
+  const response = await fetch(url)
+  const data = (await response.json()) as {
+    geo: {
+      latitude: string
+      longitude: string
+    }
+    timezone: string
+  }
+
+  return {
+    lat: data.geo.latitude,
+    lon: data.geo.longitude,
+    timezone: data.timezone,
+  }
+}
+
 export const Route = createFileRoute("/api/parse_receipt")({
   server: {
     middleware: [authMiddleware],
@@ -63,7 +85,7 @@ export const Route = createFileRoute("/api/parse_receipt")({
                       OUTPUT STRUCTURE:
                       {
                         "status": "success",
-                        "confidence_score": 0.95,
+                        "confidence_score": number,
                         "currency": string, // use ISO codes like "usd" or "eur" for example,
                         "transaction_id": string, // This can also be a receipt number or ID. Remove special characters if it has "#" or "-".
                         "merchant": {
@@ -163,7 +185,7 @@ export const Route = createFileRoute("/api/parse_receipt")({
         return Response.json({
           status: 200,
           skipped: false,
-          message: jsonOutput,
+          message: { ...jsonOutput },
         })
       },
     },
