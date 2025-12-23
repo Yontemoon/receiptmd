@@ -88,6 +88,7 @@ function RouteComponent() {
                         tax_code: "",
                         standard_unit: "USD",
                       }}
+                      totals={info.totals}
                     />
                   )}
                 </div>

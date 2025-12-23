@@ -1,11 +1,13 @@
 import { getSupabaseServerClient } from "../supabase"
+
 const getReceiptItems = async (receiptId: number) => {
   const supabase = getSupabaseServerClient()
 
   const { data, error } = await supabase
-    .from("receipt_items")
-    .select("*, receipt(*), products(*)")
+    .from("receipt")
+    .select("*, receipt_items(*, products(*)), store(*, company(*))")
     .eq("receipt_id", receiptId)
+    .single()
 
   if (error) {
     console.error(error)

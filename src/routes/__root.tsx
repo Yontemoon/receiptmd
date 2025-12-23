@@ -1,4 +1,5 @@
 /// <reference types="vite/client" />
+import * as React from "react"
 import {
   HeadContent,
   Outlet,
@@ -7,11 +8,10 @@ import {
 } from "@tanstack/react-router"
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools"
 import { createServerFn } from "@tanstack/react-start"
-import * as React from "react"
 import { DefaultCatchBoundary } from "../components/DefaultCatchBoundary"
-import { NotFound } from "../components/NotFound"
-import appCss from "../styles/app.css?url"
-import { seo } from "../utils/seo"
+import { NotFound } from "../components/not-found"
+import appCss from "~/styles/app.css?url"
+import { seo } from "~/utils/seo"
 import { getSupabaseServerClient } from "../utils/supabase"
 
 const fetchUser = createServerFn({ method: "GET" }).handler(async () => {

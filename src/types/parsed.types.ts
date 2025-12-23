@@ -5,12 +5,7 @@ type TReceipt = {
   transaction: TTime
   items: TItem[]
   currency: string
-  totals: {
-    subtotal: number
-    tax: number
-    tip: number
-    grand_total: number
-  }
+  totals: TTotals
 }
 
 type TItem = {
@@ -31,6 +26,13 @@ type TTime = {
   time: string // HH:MM
 }
 
+type TTotals = {
+  subtotal: number
+  tax: number
+  tip: number
+  grand_total: number
+}
+
 type TMerchant = {
   name: string
   store_number: string | null
@@ -40,4 +42,4 @@ type TMerchant = {
   zipcode: number
 }
 
-export type { TReceipt, TItem, TMerchant, TTime }
+export type { TReceipt, TItem, TMerchant, TTime, TTotals }

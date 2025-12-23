@@ -3,6 +3,7 @@ import { TReceipt } from "~/types/parsed.types"
 import { getSupabaseServerClient } from "~/utils/supabase"
 import { authMiddleware } from "~/lib/middleware/auth"
 import { json } from "@tanstack/react-start"
+import { fromZonedTime } from "date-fns-tz"
 
 async function getCoordsWithIPGeo(address: string) {
   const apiKey = process.env.IP_GEO_API_KEY!
@@ -24,6 +25,21 @@ async function getCoordsWithIPGeo(address: string) {
     lon: data.geo.longitude,
     timezone: data.timezone,
   }
+}
+
+export function getUtcTimestamp(
+  date: string,
+  time: string,
+  tz: string
+): string {
+  // Combine: "2025-12-21 16:30:00"
+  const localStr = `${date} ${time}:00`
+
+  // This helper creates a Date object correctly pinned to that timezone
+  const utcDate = fromZonedTime(localStr, tz)
+
+  // Returns a string like: "2025-12-22T00:30:00.000Z"
+  return utcDate.toISOString()
 }
 
 export const Route = createFileRoute("/api/receipt")({
@@ -134,6 +150,12 @@ export const Route = createFileRoute("/api/receipt")({
             storeId = newStore.store_id
           }
 
+          // for purchased at, convert date yyyy-mm-dd, time HH:MM, timezone to utc
+          const purchasedUtc = getUtcTimestamp(
+            transaction.date,
+            transaction.time,
+            geoLocation.timezone
+          )
           // ---------------------------------------------------------
           // 3. RECEIPT HEADER LOGIC
           // ---------------------------------------------------------
@@ -142,12 +164,13 @@ export const Route = createFileRoute("/api/receipt")({
             .insert({
               store_id: storeId,
               user_id: user.claims.sub,
-              purchased_at: transaction.date, // Ensure this matches DB format (ISO 8601)
+              purchased_at: purchasedUtc, // Ensure this matches DB format (ISO 8601)
               currency: currency,
               subtotal: totals.subtotal,
               tip: totals.tip,
               tax: totals.tax,
               grand_total: totals.grand_total,
+              timezone: geoLocation.timezone,
             })
             .select("receipt_id")
             .single()

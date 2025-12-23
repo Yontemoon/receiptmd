@@ -22,13 +22,14 @@ import {
 } from "~/components/ui/table"
 import { ViewOption } from "./column-toggle"
 import { Button } from "../ui/button"
-import { useForm } from "@tanstack/react-form"
-import { ZParsedData } from "~/lib/zod"
+import { TTotals } from "~/types/parsed.types"
+import { centsToDollars } from "~/lib/utils"
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
   defaultNewRow?: TData
+  totals: TTotals
   setData: React.Dispatch<React.SetStateAction<TData[]>>
 }
 
@@ -37,6 +38,7 @@ export function DataTable<TData, TValue>({
   data,
   setData,
   defaultNewRow,
+  totals,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([])
   // const [tableData, setTableData] = React.useState<TData[]>([...data])
@@ -173,12 +175,36 @@ export function DataTable<TData, TValue>({
             )}
           </TableBody>
 
-          <TableFooter>
+          <TableFooter className="w-full">
+            <TableRow className="flex items-center gap-3 mt-3 ml-2 ">
+              <TableCell>SubTotal</TableCell>
+              <TableCell className="text-right">
+                {centsToDollars(totals.subtotal)}
+              </TableCell>
+            </TableRow>
+            <TableRow className="flex items-center gap-3 mt-3 ml-2 ">
+              <TableCell>Tips</TableCell>
+              <TableCell className="text-right">
+                {centsToDollars(totals.tip)}
+              </TableCell>
+            </TableRow>
+            <TableRow className="flex items-center gap-3 mt-3 ml-2 ">
+              <TableCell>Tax</TableCell>
+              <TableCell className="text-right">
+                {centsToDollars(totals.tax)}
+              </TableCell>
+            </TableRow>
+            <TableRow className="flex items-center gap-3 mt-3 ml-2 ">
+              <TableCell>Totals</TableCell>
+              <TableCell className="text-right">
+                {centsToDollars(totals.grand_total)}
+              </TableCell>
+            </TableRow>
+
             <TableRow className="flex items-center gap-3 mt-3 ml-2 ">
               {defaultNewRow && (
                 <Button
                   variant={"secondary"}
-                  asChild
                   onClick={() => {
                     const meta = table.options.meta
                     meta?.addRow(defaultNewRow)

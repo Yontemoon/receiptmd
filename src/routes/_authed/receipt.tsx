@@ -1,42 +1,38 @@
-import { createFileRoute, Outlet, Link } from "@tanstack/react-router"
+import { createFileRoute, Outlet, Await } from "@tanstack/react-router"
 import { createServerFn } from "@tanstack/react-start"
 import { getReceipts } from "~/utils/supabase/receipt"
+import ReceiptTabs from "~/components/design/receipt-tabs"
 
 export const fetchReceipts = createServerFn({ method: "GET" }).handler(
   async () => {
     const data = await getReceipts()
-
     return data
   }
 )
 
 export const Route = createFileRoute("/_authed/receipt")({
   component: RouteComponent,
-  loader: () => fetchReceipts(),
+
+  loader: async () => {
+    const data = await fetchReceipts()
+    return data
+  },
 })
 
 function RouteComponent() {
-  const receipts = Route.useLoaderData()
+  const receiptData = Route.useLoaderData()
+
+  const receiptTabs = receiptData.map((receipt) => {
+    return {
+      id: receipt.receipt_id,
+      purchasedTimestamp: receipt.purchased_at,
+      company: receipt.store?.company?.name,
+    }
+  })
+
   return (
     <div className="p-2 flex gap-2">
-      <ul className="list-disc pl-4">
-        {receipts.map((receipt) => {
-          return (
-            <li key={receipt.receipt_id} className="whitespace-nowrap">
-              <Link
-                to="/receipt/$receiptId"
-                params={{
-                  receiptId: receipt.receipt_id.toString(),
-                }}
-                className="block py-1 hover:underline"
-                activeProps={{ className: "text-black font-bold" }}
-              >
-                <div>{receipt.purchased_at}</div>
-              </Link>
-            </li>
-          )
-        })}
-      </ul>
+      <ReceiptTabs ReceiptData={receiptTabs} />
       <Outlet />
     </div>
   )

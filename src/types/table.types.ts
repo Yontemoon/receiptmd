@@ -1,6 +1,7 @@
 import { RowData } from "@tanstack/react-table"
 
 declare module "@tanstack/react-table" {
+  // Individual Cell
   interface TableMeta<TData extends RowData> {
     editedRows: Record<string, string>
     setEditedRows: React.Dispatch<React.SetStateAction<{}>>
@@ -10,7 +11,10 @@ declare module "@tanstack/react-table" {
     removeRow: (index: number) => void
     removeSelectedRows: (selected: number[]) => void
   }
+
+  // Individual Columns
   interface ColumnMeta<TData extends RowData, TValue> {
     type: React.HTMLInputTypeAttribute
+    isCurrency?: boolean
   }
 }

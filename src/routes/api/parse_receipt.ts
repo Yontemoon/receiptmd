@@ -46,7 +46,6 @@ export const Route = createFileRoute("/api/parse_receipt")({
         const formData = await request.formData()
 
         const file = formData.get("file") as File | null
-        console.log(file)
 
         if (!file) {
           return Response.json({
@@ -107,7 +106,7 @@ export const Route = createFileRoute("/api/parse_receipt")({
                             "category": string, // From the allowed list above
                             "quantity": number, // Default to 1 if not specified
                             "standard_unit": string, // From the allowed list above
-                            "unit_price": number, // Price per 1 unit in cents
+                            "unit_price": number, // Price per 1 unit in cents, Some lines have a dollar sign $, don't confuse that with a 5 or 8.
                             "total_line_price": number, // Quantity * Unit Price in cents
                             "sku_or_upc": string | null, // The product code if visible
                             "tax_code": string | null // e.g., "A", "E", "T", "F"
@@ -163,7 +162,6 @@ export const Route = createFileRoute("/api/parse_receipt")({
           })
         }
         console.log(output)
-
         if (!output) {
           return Response.json({
             status: 200,

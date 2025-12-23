@@ -6,6 +6,7 @@ const getReceipts = async () => {
   const { data, error } = await supabase
     .from("receipt")
     .select("*, store(*, company(*))")
+    .order("purchased_at", { ascending: false })
 
   if (error) {
     return []
@@ -31,4 +32,26 @@ const getReceiptById = async (id: number) => {
   return data
 }
 
-export { getReceipts, getReceiptById }
+const deleteReceipt = async (id: number) => {
+  try {
+    const supabase = getSupabaseServerClient()
+
+    const { error } = await supabase
+      .from("receipt")
+      .delete()
+      .eq("receipt_id", id)
+
+      .maybeSingle()
+
+    if (error) {
+      console.error(error)
+      throw new Error("Something went wrong")
+    }
+
+    return { success: true }
+  } catch (_error) {
+    return { success: false }
+  }
+}
+
+export { getReceipts, getReceiptById, deleteReceipt }

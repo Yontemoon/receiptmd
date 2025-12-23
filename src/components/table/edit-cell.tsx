@@ -1,6 +1,7 @@
 import React from "react"
 import { Input } from "../ui/input"
 import { Row, Column, Table } from "@tanstack/react-table"
+import { centsToDollars, isStringNumeric } from "~/lib/utils"
 
 // ! Modify this
 type PropTypes = {
@@ -12,7 +13,9 @@ type PropTypes = {
 
 const EditCell = ({ getValue, row, column, table }: PropTypes) => {
   const initialValue = getValue()
-  const tableMeta = table.options.meta
+  const cellMeta = table.options.meta
+  const columnMeta = column.columnDef.meta
+
   const [value, setValue] = React.useState<string>(initialValue as string)
 
   React.useEffect(() => {
@@ -23,17 +26,23 @@ const EditCell = ({ getValue, row, column, table }: PropTypes) => {
     table.options.meta?.updateData(row.index, column.id, value)
   }
 
-  if (tableMeta?.editedRows[row.id]) {
+  if (cellMeta?.editedRows[row.id]) {
     return (
       <Input
-        type={column.columnDef.meta?.type || "text"}
+        type={columnMeta?.type || "text"}
         value={value}
         onChange={(e) => setValue(e.target.value)}
         onBlur={onBlur}
       />
     )
   }
-  return <span>{value}</span>
+  return (
+    <span>
+      {columnMeta?.isCurrency && isStringNumeric(value)
+        ? centsToDollars(Number(value))
+        : value}
+    </span>
+  )
 }
 
 export default EditCell
